@@ -1,0 +1,9 @@
+shovel.png
+size:128,64
+repeat:none
+empty_slot
+bounds:36,6,35,13
+inslot
+bounds:36,21,35,13
+shovel
+bounds:2,2,32,32

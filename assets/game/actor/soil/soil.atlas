@@ -1,0 +1,15 @@
+soil.png
+size:256,64
+repeat:none
+soil
+index:1
+bounds:2,2,52,44
+soil
+index:3
+bounds:56,2,52,44
+soil
+index:0
+bounds:110,2,52,44
+soil
+index:2
+bounds:164,2,52,44

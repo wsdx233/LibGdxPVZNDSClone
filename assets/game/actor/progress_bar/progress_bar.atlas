@@ -1,0 +1,11 @@
+progress_bar.png
+size:512,32
+repeat:none
+bg
+bounds:2,4,258,23
+fill
+bounds:312,20,2,7
+flag
+bounds:288,5,22,22
+zombie
+bounds:262,2,24,25

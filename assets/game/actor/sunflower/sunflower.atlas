@@ -1,0 +1,45 @@
+sunflower.png
+size:512,64
+repeat:none
+idle
+  index:1
+  bounds:2,2,30,33
+idle
+  index:3
+  bounds:98,2,30,33
+idle
+  index:0
+  bounds:162,2,30,33
+idle
+  index:5
+  bounds:194,2,30,33
+idle
+  index:2
+  bounds:258,2,30,33
+idle
+  index:4
+  bounds:322,2,30,33
+producing
+  index:0
+  bounds:34,2,30,33
+producing
+  index:5
+  bounds:66,2,30,33
+producing
+  index:2
+  bounds:130,2,30,33
+producing
+  index:4
+  bounds:226,2,30,33
+producing
+  index:1
+  bounds:290,2,30,33
+producing
+  index:3
+  bounds:354,2,30,33
+seeds
+  index:1
+  bounds:386,9,27,26
+seeds
+  index:0
+  bounds:415,9,27,26
