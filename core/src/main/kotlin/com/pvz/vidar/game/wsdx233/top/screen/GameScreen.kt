@@ -22,7 +22,7 @@ class GameScreen(private val game: Main) : KtxScreen {
     companion object {
         private const val TOTAL_GAME_DURATION = 300f // seconds
         private const val INITIAL_SPAWN_INTERVAL = 10f // seconds
-        private const val FINAL_SPAWN_INTERVAL = 0.01f // seconds
+        private const val FINAL_SPAWN_INTERVAL = 0.00001f // seconds
         private const val PREVIEW_DURATION = 2f // seconds
         private const val CAMERA_PREVIEW_X = 515f
         private const val CAMERA_MOVE_SPEED = 80f // pixels per second
@@ -88,7 +88,12 @@ class GameScreen(private val game: Main) : KtxScreen {
     private var gameLost = false
     private var zombieSpawnCount = 0
 
-    private val FLAG = "flag{BECAUSE_I_AM_CRAAAZY}"
+    // 游戏胜利相关
+    private var gameWon = false
+
+    // 击杀统计
+    var zombieKillCount = 0
+
 
     private val plantDeathListener = object : PlantDeathListener {
         override fun onPlantDied(plant: Plant) {
@@ -99,6 +104,10 @@ class GameScreen(private val game: Main) : KtxScreen {
     private val zombieDeathListener = object : ZombieDeathListener {
         override fun onZombieDied(zombie: Zombie) {
             lawnGroup.removeActor(zombie)
+            // 增加击杀计数（排除预览僵尸）
+            if (zombie.state != ZombieState.IDLE) {
+                zombieKillCount++
+            }
         }
     }
 
@@ -173,6 +182,12 @@ class GameScreen(private val game: Main) : KtxScreen {
         // 重置游戏失败状态
         gameLost = false
         zombieSpawnCount = 0
+
+        // 重置游戏胜利状态
+        gameWon = false
+
+        // 重置击杀统计
+        zombieKillCount = 0
 
         // 清空卡片列表
         cards.clear()
@@ -592,7 +607,7 @@ class GameScreen(private val game: Main) : KtxScreen {
         }
 
         // 游戏逻辑只在游戏开始后执行
-        if (gameStarted && !gameLost) {
+        if (gameStarted && !gameLost && !gameWon) {
             // 检查游戏失败条件：任何僵尸的x坐标小于50f
             zombies.forEach { zombie ->
                 if (zombie.x < 50f) {
@@ -611,6 +626,16 @@ class GameScreen(private val game: Main) : KtxScreen {
             gameTime += delta
             spawnTimer += delta
             sunDropTimer += delta
+
+            // 检查游戏胜利条件：时间到达300秒且所有僵尸都被消灭
+            if (gameTime >= TOTAL_GAME_DURATION && zombies.size == 0) {
+                gameWon = true
+                // 停止音乐
+                Assets.grassMusic.stop()
+                // 跳转到FlagScreen
+                game.setScreen<FlagScreen>()
+                return@render
+            }
 
             if (firstZombieSpawned && firstZombieTimer < 2f) {
                 firstZombieTimer += delta

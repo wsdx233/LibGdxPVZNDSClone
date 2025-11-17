@@ -6,7 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.utils.Align
 
-class LogoImage : Image(Texture(Gdx.files.internal("assets/logo.png"))) {
+class LogoImage : Image(Texture(Gdx.files.internal("logo.png"))) {
     init {
         setSize(160f, 240f)
         setPosition(200f,180f, Align.center)

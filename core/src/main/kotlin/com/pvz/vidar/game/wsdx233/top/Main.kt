@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture.TextureFilter.Linear
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.utils.viewport.FitViewport
+import com.pvz.vidar.game.wsdx233.top.screen.FlagScreen
 import com.pvz.vidar.game.wsdx233.top.screen.GameScreen
 import com.pvz.vidar.game.wsdx233.top.screen.TitleScreen
 import ktx.app.KtxGame
@@ -22,6 +23,7 @@ class Main : KtxGame<KtxScreen>() {
 
         addScreen(TitleScreen(this))
         addScreen(GameScreen(this))
-        setScreen<TitleScreen>()
+        addScreen(FlagScreen(this))
+        setScreen<FlagScreen>()
     }
 }

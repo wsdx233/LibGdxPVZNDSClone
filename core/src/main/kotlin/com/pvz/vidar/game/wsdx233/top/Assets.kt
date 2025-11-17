@@ -52,7 +52,7 @@ class Assets {
         val awoogaSound = Gdx.audio.newSound(Gdx.files.internal("fx/awooga.mp3"))
         val evillaughSound = Gdx.audio.newSound(Gdx.files.internal("fx/evillaugh.mp3"))
         val gravebuttonSound = Gdx.audio.newSound(Gdx.files.internal("fx/gravebutton.mp3"))
-        val potatoMineSound = Gdx.audio.newSound(Gdx.files.internal("assets/fx/potato_mine.mp3"))
+        val potatoMineSound = Gdx.audio.newSound(Gdx.files.internal("fx/potato_mine.mp3"))
         val finalwaveSound = Gdx.audio.newSound(Gdx.files.internal("fx/finalwave.mp3"))
         val sirenSound = Gdx.audio.newSound(Gdx.files.internal("fx/siren.mp3"))
         val screamSound = Gdx.audio.newSound(Gdx.files.internal("fx/scream.mp3"))
