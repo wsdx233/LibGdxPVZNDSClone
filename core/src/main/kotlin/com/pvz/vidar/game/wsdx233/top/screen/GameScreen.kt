@@ -107,6 +107,7 @@ class GameScreen(private val game: Main) : KtxScreen {
             // 增加击杀计数（排除预览僵尸）
             if (zombie.state != ZombieState.IDLE) {
                 zombieKillCount++
+                print(zombieKillCount)
             }
         }
     }
@@ -632,8 +633,10 @@ class GameScreen(private val game: Main) : KtxScreen {
                 gameWon = true
                 // 停止音乐
                 Assets.grassMusic.stop()
-                // 跳转到FlagScreen
-                game.setScreen<FlagScreen>()
+                // 跳转到FlagScreen，传递击杀数量
+                val flagScreen = FlagScreen(game, zombieKillCount)
+                game.addScreen(flagScreen)
+                game.setScreen(flagScreen::class.java)
                 return@render
             }
 

@@ -19,25 +19,28 @@ import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import kotlin.experimental.xor
 
-class FlagScreen(private val game: Main) : KtxScreen {
+// 僵尸击杀数 260
+
+class FlagScreen(private val game: Main, private val zombieKillCount: Int = 0) : KtxScreen {
 
     private val camera = OrthographicCamera()
     private val stage = Stage(ExtendViewport(640f, 360f, camera))
 
-    // Multi-layer encrypted flag storage
-    // Layer 1: XOR obfuscation with multiple keys (outermost layer)
-    private val encryptedChunk1 = byteArrayOf(
-        0x56.toByte(), 0x91.toByte(), 0xd0.toByte(), 0x78.toByte(),
-        0x13.toByte(), 0x82.toByte(), 0x40.toByte(), 0xeb.toByte(),
-        0x31.toByte(), 0xbd.toByte(), 0x1a.toByte(), 0xda.toByte(),
-        0x1a.toByte()
-    )
-
-    private val encryptedChunk2 = byteArrayOf(
-        0x98.toByte(), 0x27.toByte(), 0x82.toByte(), 0x65.toByte(),
-        0xc7.toByte(), 0xed.toByte(), 0x4d.toByte(), 0x12.toByte(),
-        0x89.toByte(), 0x54.toByte(), 0xe4.toByte(), 0x23.toByte(),
-        0xa3.toByte()
+    // Kill count encrypted flag (requires kill count to round to 260)
+    // Only kill counts 255-264 will decrypt correctly
+    // Uses complex multi-layer key derivation with position-dependent encryption
+    // This contains both chunks encrypted together
+    private val killCountEncryptedFlag = byteArrayOf(
+        // Chunk 1 (13 bytes)
+        0x00.toByte(), 0xf8.toByte(), 0xfa.toByte(), 0x06.toByte(),
+        0x1f.toByte(), 0xd9.toByte(), 0x98.toByte(), 0x72.toByte(),
+        0x56.toByte(), 0xe9.toByte(), 0xdd.toByte(), 0x1c.toByte(),
+        0x86.toByte(),
+        // Chunk 2 (13 bytes)
+        0x38.toByte(), 0x1d.toByte(), 0x82.toByte(), 0xe3.toByte(),
+        0x5e.toByte(), 0x17.toByte(), 0xe3.toByte(), 0x2e.toByte(),
+        0x82.toByte(), 0xfc.toByte(), 0x2d.toByte(), 0x14.toByte(),
+        0xc7.toByte()
     )
 
     // XOR keys stored separately
@@ -73,6 +76,47 @@ class FlagScreen(private val game: Main) : KtxScreen {
 
     // Reverse substitution for decryption
     private val reverseSubstitutionMap = substitutionMap.entries.associate { (k, v) -> v to k }
+
+    // Complex key derivation using multiple mathematical transformations
+    private fun deriveKeyFromKillCount(killCount: Int): ByteArray {
+        // Layer 1: Apply rounding transformation
+        val rounded = ((killCount + 5) / 10) * 10
+
+        // Layer 2: Hash-like transformation using prime numbers
+        val hash1 = (rounded * 31 + 17) % 997
+        val hash2 = (rounded * 37 + 23) % 991
+        val hash3 = (rounded * 41 + 29) % 983
+
+        // Layer 3: Combine hashes with XOR and rotation
+        val combined = (hash1 xor (hash2 shl 3) xor (hash3 shr 2)) % 256
+
+        // Layer 4: Generate multi-byte key using seed
+        val seed = (rounded * 7 + hash1 + hash2 + hash3) % 65536
+        val key = ByteArray(16)
+        var state = seed
+        for (i in key.indices) {
+            state = (state * 1103515245 + 12345) and 0x7fffffff
+            key[i] = ((state shr 16) % 256).toByte()
+        }
+
+        return key
+    }
+
+    // Multi-layer XOR decryption with position-dependent keys
+    private fun decryptWithKillCount(data: ByteArray, killCount: Int): ByteArray {
+        val keyStream = deriveKeyFromKillCount(killCount)
+        val result = ByteArray(data.size)
+
+        for (i in data.indices) {
+            // Use different key bytes for different positions
+            val keyByte = keyStream[i % keyStream.size]
+            // Add position-dependent transformation
+            val positionKey = ((i * 13 + 7) % 256).toByte()
+            result[i] = (data[i].toInt() xor keyByte.toInt() xor positionKey.toInt()).toByte()
+        }
+
+        return result
+    }
 
     // Decryption function - Layer 1: XOR decryption
     private fun xorDecrypt(data: ByteArray, key: Byte): ByteArray {
@@ -131,9 +175,18 @@ class FlagScreen(private val game: Main) : KtxScreen {
     // Master decryption function combining all layers
     private fun decryptFlag(): String {
         try {
+            // Step 0: Decrypt using kill count (NEW LAYER - must round to 260)
+            // This decrypts to get two chunks that need further processing
+            val killCountDecrypted = decryptWithKillCount(killCountEncryptedFlag, zombieKillCount)
+
+            // Split the decrypted data into two chunks (13 bytes each)
+            val chunkSize = killCountDecrypted.size / 2
+            val decryptedChunk1 = killCountDecrypted.sliceArray(0 until chunkSize)
+            val decryptedChunk2 = killCountDecrypted.sliceArray(chunkSize until killCountDecrypted.size)
+
             // Step 1: XOR decrypt both chunks with different keys (outermost layer)
-            val decrypted1 = xorDecrypt(encryptedChunk1, xorKey1)
-            val decrypted2 = xorDecrypt(encryptedChunk2, xorKey2)
+            val decrypted1 = xorDecrypt(decryptedChunk1, xorKey1)
+            val decrypted2 = xorDecrypt(decryptedChunk2, xorKey2)
 
             // Step 2: Combine chunks
             val combined = decrypted1 + decrypted2

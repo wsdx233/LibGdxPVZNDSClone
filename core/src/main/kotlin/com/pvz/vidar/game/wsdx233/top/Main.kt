@@ -23,7 +23,8 @@ class Main : KtxGame<KtxScreen>() {
 
         addScreen(TitleScreen(this))
         addScreen(GameScreen(this))
-        addScreen(FlagScreen(this))
-        setScreen<FlagScreen>()
+//        addScreen(FlagScreen(this))
+        setScreen<TitleScreen>()
+
     }
 }
